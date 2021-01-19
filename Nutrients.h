@@ -14,23 +14,23 @@ struct Testprob
 #if defined(COUPLED)
 	Testprob()
 	{
-		U = 0.0;
-        V = 0.0;
+		nB = 0.0;
+        nA = 0.0;
 	}
 
-	Testprob(double _u, double _v): U(_u), V(_v) {}
+	Testprob(double _B, double _A): nB(_B), nA(_A) {}
 
-	double U;
-    double V;
+	double nB;
+    double nA;
 #else
 	Testprob()
 	{
-		Approx = 0.0;
+		nB = 0.0;
 	}
 
-	Testprob(double _v): Approx(_v) {}
+	Testprob(double _B): nB(_B) {}
 
-	double Approx;
+	double nB;
 #endif
 
 };

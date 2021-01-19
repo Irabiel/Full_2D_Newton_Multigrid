@@ -121,10 +121,13 @@ private:
     double hx;
     double hy;
     
-    double fu(double u) {return u*u;};
-    double du(double u) {return 2*u;};
+    double fB(double u) {return u*u;};
+    double dfB(double u) {return 2*u;};
     
-    double fij(double hx, double hy, double i, double j) {return (-2*( (i*hx)*((i*hx) - 1) + (j*hy)*((j*hy) - 1) ) + (i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)*(i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1));};
+    double fA(double v) {return v*v;};
+    double dfA(double v) {return 2*v;};
+    
+    double fij(double hx, double hy, double i, double j) {return (-2*( (i*hx)*((i*hx) - 1) + (j*hy)*((j*hy) - 1) ) + 2*(i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)*(i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1));};
     
     // private member functions.
     int ipow(int base, int exp);

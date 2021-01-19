@@ -258,22 +258,21 @@ void Multigrid::setF()
 #if defined(COUPLED)
             if (i == 0 || i == nx || j == 0 || j == ny)
             {
-                SolRes[0][0](i,j).U = Sol[0][0](i,j).U - SolStencil[0][0](i,j)(1,1,0,0)*Sol[0][0](i,j).U;
-                SolRes[0][0](i,j).V = Sol[0][0](i,j).V - SolStencil[0][0](i,j)(1,1,1,1)*Sol[0][0](i,j).V;
+                SolRes[0][0](i,j).nB = Sol[0][0](i,j).nB - SolStencil[0][0](i,j)(1,1,0,0)*Sol[0][0](i,j).nB;
+                SolRes[0][0](i,j).nA = Sol[0][0](i,j).nA - SolStencil[0][0](i,j)(1,1,1,1)*Sol[0][0](i,j).nA;
             }
             else  
             {              
-                SolRes[0][0](i,j).U = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,0,0)*Sol[0][0](i-1,j).U + SolStencil[0][0](i,j)(1,1,0,0)*Sol[0][0](i,j).U + fu(Sol[0][0](i,j).V) + SolStencil[0][0](i,j)(2,1,0,0)*Sol[0][0](i+1,j).U + SolStencil[0][0](i,j)(1,0,0,0)*Sol[0][0](i,j-1).U + SolStencil[0][0](i,j)(1,2,0,0)*Sol[0][0](i,j+1).U);
+                SolRes[0][0](i,j).nB = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,0,0)*Sol[0][0](i-1,j).nB + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nB + fA(Sol[0][0](i,j).nA) + fB(Sol[0][0](i,j).nB) + SolStencil[0][0](i,j)(2,1,0,0)*Sol[0][0](i+1,j).nB + SolStencil[0][0](i,j)(1,0,0,0)*Sol[0][0](i,j-1).nB + SolStencil[0][0](i,j)(1,2,0,0)*Sol[0][0](i,j+1).nB);
             
-                SolRes[0][0](i,j).V = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,1,1)*Sol[0][0](i-1,j).V + fu(Sol[0][0](i,j).U) + 
-                SolStencil[0][0](i,j)(1,1,1,1)*Sol[0][0](i,j).V + SolStencil[0][0](i,j)(2,1,1,1)*Sol[0][0](i+1,j).V + SolStencil[0][0](i,j)(1,0,1,1)*Sol[0][0](i,j-1).V + SolStencil[0][0](i,j)(1,2,1,1)*Sol[0][0](i,j+1).V);
+                SolRes[0][0](i,j).nA = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,1,1)*Sol[0][0](i-1,j).nA + fB(Sol[0][0](i,j).nB) + fA(Sol[0][0](i,j).nA)+(2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nA + SolStencil[0][0](i,j)(2,1,1,1)*Sol[0][0](i+1,j).nA + SolStencil[0][0](i,j)(1,0,1,1)*Sol[0][0](i,j-1).nA + SolStencil[0][0](i,j)(1,2,1,1)*Sol[0][0](i,j+1).nA);
             }
 #else
             if (i == 0 || i == nx || j == 0 || j == ny)
-                SolRes[0][0](i,j).Approx = Sol[0][0](i,j).Approx - SolStencil[0][0](i,j)(1,1)*Sol[0][0](i,j).Approx;
+                SolRes[0][0](i,j).nB = Sol[0][0](i,j).nB - SolStencil[0][0](i,j)(1,1)*Sol[0][0](i,j).nB;
             else
             {
-                SolRes[0][0](i,j).Approx = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1)*Sol[0][0](i-1,j).Approx + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).Approx + fu(Sol[0][0](i,j).Approx ) + SolStencil[0][0](i,j)(2,1)*Sol[0][0](i+1,j).Approx + SolStencil[0][0](i,j)(1,0)*Sol[0][0](i,j-1).Approx + SolStencil[0][0](i,j)(1,2)*Sol[0][0](i,j+1).Approx);
+                SolRes[0][0](i,j).nB = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1)*Sol[0][0](i-1,j).nB + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nB + fB(Sol[0][0](i,j).nB ) + SolStencil[0][0](i,j)(2,1)*Sol[0][0](i+1,j).nB + SolStencil[0][0](i,j)(1,0)*Sol[0][0](i,j-1).nB + SolStencil[0][0](i,j)(1,2)*Sol[0][0](i,j+1).nB);
             }
 #endif
 
@@ -295,10 +294,10 @@ void Multigrid::resetZero()
             for ( j=0; j<=ny; j++)
             {
 #if defined(COUPLED)
-                SolErr[l][0](i,j).U = 0;
-                SolErr[l][0](i,j).V = 0;
+                SolErr[l][0](i,j).nB = 0;
+                SolErr[l][0](i,j).nA = 0;
 #else
-                SolErr[l][0](i,j).Approx = 0;
+                SolErr[l][0](i,j).nB = 0;
 #endif
             }
         }
@@ -360,10 +359,10 @@ void Multigrid::setOperators()
                     {
                         if (k*l == 1)
                         {
-                            SolStencil[0][0](i,j)(k,l,1,1) = 2.0/(hx*hx) + 2.0/(hy*hy);
-                            SolStencil[0][0](i,j)(k,l,0,0) = 2.0/(hx*hx) + 2.0/(hy*hy);
-                            SolStencil[0][0](i,j)(k,l,0,1) = du(Sol[0][0](i,j).V);
-                            SolStencil[0][0](i,j)(k,l,1,0) = du(Sol[0][0](i,j).U);
+                            SolStencil[0][0](i,j)(k,l,0,0) = 2.0/(hx*hx) + 2.0/(hy*hy) + dfB(Sol[0][0](i,j).nB);
+                            SolStencil[0][0](i,j)(k,l,0,1) = dfA(Sol[0][0](i,j).nA);
+                            SolStencil[0][0](i,j)(k,l,1,0) = dfB(Sol[0][0](i,j).nB);
+                            SolStencil[0][0](i,j)(k,l,1,1) = 2.0/(hx*hx) + 2.0/(hy*hy) + dfA(Sol[0][0](i,j).nA);
                         }
                         else
                         {
@@ -413,7 +412,7 @@ void Multigrid::setOperators()
             {   
                 SolStencil[0][0](i,j)(0,1) = -1.0/(hx*hx);
                 SolStencil[0][0](i,j)(2,1) = -1.0/(hx*hx);
-                SolStencil[0][0](i,j)(1,1) =  2.0/(hx*hx) + 2.0/(hy*hy)+du(Sol[0][0](i,j).Approx);
+                SolStencil[0][0](i,j)(1,1) =  2.0/(hx*hx) + 2.0/(hy*hy)+dfB(Sol[0][0](i,j).nB);
                 SolStencil[0][0](i,j)(1,0) = -1.0/(hy*hy);
                 SolStencil[0][0](i,j)(1,2) = -1.0/(hy*hy);
             }
@@ -500,42 +499,42 @@ void Multigrid::relaxationElementwise(int l,int i, int j, int nx, int ny)
 {
     
 #if defined(COUPLED)
-    double ru = SolRes[l][0](i,j).U, tru = SolRes[l][0](i,j).U;
-    double rv = SolRes[l][0](i,j).V, trv = SolRes[l][0](i,j).V;
+    double rB = SolRes[l][0](i,j).nB, trB = SolRes[l][0](i,j).nB;
+    double rv = SolRes[l][0](i,j).nA, trv = SolRes[l][0](i,j).nA;
     for (int i1=0; i1<3; i1++)
     {
         for (int j1=0; j1<3; j1++)
         {
             if (i1*j1!=1)
             {
-                ru = ru-(*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).U-(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).V;
-                rv = rv-(*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).U-(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).V;
+                rB = rB-(*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
+                rv = rv-(*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
             }
 
         }
     }
     
     double d1 = det2x2((*SolStencil[l])(i,j)(1,1,0,0),(*SolStencil[l])(i,j)(1,1,0,1),(*SolStencil[l])(i,j)(1,1,1,0),(*SolStencil[l])(i,j)(1,1,1,1));
-    double nu = det2x2(ru,rv,(*SolStencil[l])(i,j)(1,1,0,1),(*SolStencil[l])(i,j)(1,1,0,0));
-    double nv = det2x2(rv,ru,(*SolStencil[l])(i,j)(1,1,1,0),(*SolStencil[l])(i,j)(1,1,1,1));
+    double nu = det2x2(rB,rv,(*SolStencil[l])(i,j)(1,1,0,1),(*SolStencil[l])(i,j)(1,1,0,0));
+    double nv = det2x2(rv,rB,(*SolStencil[l])(i,j)(1,1,1,0),(*SolStencil[l])(i,j)(1,1,1,1));
     
     if (abs(nu/d1)<10)
-        SolErr[l][0](i,j).U = nu/d1;
+        SolErr[l][0](i,j).nB = nu/d1;
     if (abs(nv/d1)<10)
-        SolErr[l][0](i,j).V = nv/d1;
+        SolErr[l][0](i,j).nA = nv/d1;
 #else
-    double rc = SolRes[l][0](i,j).Approx, trc = SolRes[l][0](i,j).Approx;
+    double rB = SolRes[l][0](i,j).nB, trB = SolRes[l][0](i,j).nB;
     for (int i1=0; i1<3; i1++)
     {
         for (int j1=0; j1<3; j1++)
         {
             if (i1*j1!=1)
             {
-                rc = rc-(*SolStencil[l])(i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).Approx;
+                rB = rB-(*SolStencil[l])(i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).nB;
             }
         }
     }
-    SolErr[l][0](i,j).Approx = rc/SolStencil[l][0](i,j)(1,1);
+    SolErr[l][0](i,j).nB = rB/SolStencil[l][0](i,j)(1,1);
 #endif
 
 }
@@ -569,23 +568,23 @@ void Multigrid::residueRestriction(int l)
 void Multigrid::restrictionElementwise1(int l,int i, int j, int nx, int ny)
 {
 #if defined(COUPLED)
-    SolResTmp[l][0](i,j).U = SolRes[l][0](i,j).U;
-    SolResTmp[l][0](i,j).V = SolRes[l][0](i,j).V;
+    SolResTmp[l][0](i,j).nB = SolRes[l][0](i,j).nB;
+    SolResTmp[l][0](i,j).nA = SolRes[l][0](i,j).nA;
     for (int i1=0;i1<3;i1++)
     {
         for (int j1=0;j1<3;j1++)
         {            
-            SolResTmp[l][0](i,j).U -= (*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).U+(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).V;
-            SolResTmp[l][0](i,j).V -= (*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).U+(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).V;
+            SolResTmp[l][0](i,j).nB -= (*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).nB+(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
+            SolResTmp[l][0](i,j).nA -= (*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).nB+(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
         }
     }
 #else
-    SolResTmp[l][0](i,j).Approx = SolRes[l][0](i,j).Approx;
+    SolResTmp[l][0](i,j).nB = SolRes[l][0](i,j).nB;
     for (int i1=0;i1<3;i1++)
     {
         for (int j1=0;j1<3;j1++)
         {
-            SolResTmp[l][0](i,j).Approx -= SolStencil[l][0](i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).Approx;
+            SolResTmp[l][0](i,j).nB -= SolStencil[l][0](i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).nB;
         }
     }
 #endif
@@ -595,23 +594,23 @@ void Multigrid::restrictionElementwise1(int l,int i, int j, int nx, int ny)
 void Multigrid::restrictionElementwise2(int l,int i, int j, int nx, int ny)
 {
 #if defined(COUPLED)
-    SolRes[l][0](i,j).U = 0;
-    SolRes[l][0](i,j).V = 0;
+    SolRes[l][0](i,j).nB = 0;
+    SolRes[l][0](i,j).nA = 0;
     for (int i1=0;i1<3;i1++)
     {
         for (int j1=0; j1<3; j1++)
         {
-            SolRes[l][0](i,j).U += SolRestrict[l][0](i,j)(i1,j1)*SolResTmp[l-1][0](2*i+i1-1,2*j+j1-1).U;
-            SolRes[l][0](i,j).V += SolRestrict[l][0](i,j)(i1,j1)*SolResTmp[l-1][0](2*i+i1-1,2*j+j1-1).V;
+            SolRes[l][0](i,j).nB += SolRestrict[l][0](i,j)(i1,j1)*SolResTmp[l-1][0](2*i+i1-1,2*j+j1-1).nB;
+            SolRes[l][0](i,j).nA += SolRestrict[l][0](i,j)(i1,j1)*SolResTmp[l-1][0](2*i+i1-1,2*j+j1-1).nA;
         }
     }
 #else
-    SolRes[l][0](i,j).Approx = 0;
+    SolRes[l][0](i,j).nB = 0;
     for (int i1=0;i1<3;i1++)
     {
         for (int j1=0;j1<3;j1++)
         {
-            SolRes[l][0](i,j).Approx += SolRestrict[l][0](i,j)(i1,j1)*SolResTmp[l-1][0](2*i+i1-1,2*j+j1-1).Approx;
+            SolRes[l][0](i,j).nB += SolRestrict[l][0](i,j)(i1,j1)*SolResTmp[l-1][0](2*i+i1-1,2*j+j1-1).nB;
         }
     }
 #endif
@@ -644,26 +643,26 @@ void Multigrid::interpolationElementwise(int l, int i, int j, int nx, int ny)
     {
         if (j0 == 0)
         {
-            SolErr[l][0](i,j).U += SolInterpolate[l][0](i,j)(1,1)*SolErr[l+1][0](i/2,j/2).U;
-            SolErr[l][0](i,j).V += SolInterpolate[l][0](i,j)(1,1)*SolErr[l+1][0](i/2,j/2).V;
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(1,1)*SolErr[l+1][0](i/2,j/2).nB;
+            SolErr[l][0](i,j).nA += SolInterpolate[l][0](i,j)(1,1)*SolErr[l+1][0](i/2,j/2).nA;
         }
         else
         {
-            SolErr[l][0](i,j).U += SolInterpolate[l][0](i,j)(1,0)*SolErr[l+1][0](i/2,(j-1)/2).U+SolInterpolate[l][0](i,j)(1,2)*SolErr[l+1][0](i/2,(j+1)/2).U; 
-            SolErr[l][0](i,j).V += SolInterpolate[l][0](i,j)(1,0)*SolErr[l+1][0](i/2,(j-1)/2).V+SolInterpolate[l][0](i,j)(1,2)*SolErr[l+1][0](i/2,(j+1)/2).V; 
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(1,0)*SolErr[l+1][0](i/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(1,2)*SolErr[l+1][0](i/2,(j+1)/2).nB; 
+            SolErr[l][0](i,j).nA += SolInterpolate[l][0](i,j)(1,0)*SolErr[l+1][0](i/2,(j-1)/2).nA+SolInterpolate[l][0](i,j)(1,2)*SolErr[l+1][0](i/2,(j+1)/2).nA; 
         }
     }
     else
     {
         if (j0 == 0)
         {
-            SolErr[l][0](i,j).U += SolInterpolate[l][0](i,j)(0,1)*SolErr[l+1][0]((i-1)/2,j/2).U+SolInterpolate[l][0](i,j)(2,1)*SolErr[l+1][0]((i+1)/2,j/2).U; 
-            SolErr[l][0](i,j).V += SolInterpolate[l][0](i,j)(0,1)*SolErr[l+1][0]((i-1)/2,j/2).V+SolInterpolate[l][0](i,j)(2,1)*SolErr[l+1][0]((i+1)/2,j/2).V; 
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(0,1)*SolErr[l+1][0]((i-1)/2,j/2).nB+SolInterpolate[l][0](i,j)(2,1)*SolErr[l+1][0]((i+1)/2,j/2).nB; 
+            SolErr[l][0](i,j).nA += SolInterpolate[l][0](i,j)(0,1)*SolErr[l+1][0]((i-1)/2,j/2).nA+SolInterpolate[l][0](i,j)(2,1)*SolErr[l+1][0]((i+1)/2,j/2).nA; 
         }
         else
         {
-            SolErr[l][0](i,j).U += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).U+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).U+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).U+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).U; 
-            SolErr[l][0](i,j).V += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).V+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).U+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).V+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).V; 
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).nB+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).nB; 
+            SolErr[l][0](i,j).nA += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).nA+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).nA+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).nA; 
         }
     }
 #else
@@ -673,22 +672,22 @@ void Multigrid::interpolationElementwise(int l, int i, int j, int nx, int ny)
     {
         if (j0 == 0)
         {
-            SolErr[l][0](i,j).Approx += SolInterpolate[l][0](i,j)(1,1)*SolErr[l+1][0](i/2,j/2).Approx;
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(1,1)*SolErr[l+1][0](i/2,j/2).nB;
         }
         else
         {
-            SolErr[l][0](i,j).Approx += SolInterpolate[l][0](i,j)(1,0)*SolErr[l+1][0](i/2,(j-1)/2).Approx+SolInterpolate[l][0](i,j)(1,2)*SolErr[l+1][0](i/2,(j+1)/2).Approx; 
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(1,0)*SolErr[l+1][0](i/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(1,2)*SolErr[l+1][0](i/2,(j+1)/2).nB; 
         }
     }
     else
     {
         if (j0 == 0)
         {
-            SolErr[l][0](i,j).Approx += SolInterpolate[l][0](i,j)(0,1)*SolErr[l+1][0]((i-1)/2,j/2).Approx+SolInterpolate[l][0](i,j)(2,1)*SolErr[l+1][0]((i+1)/2,j/2).Approx; 
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(0,1)*SolErr[l+1][0]((i-1)/2,j/2).nB+SolInterpolate[l][0](i,j)(2,1)*SolErr[l+1][0]((i+1)/2,j/2).nB; 
         }
         else
         {
-            SolErr[l][0](i,j).Approx += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).Approx+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).Approx+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).Approx+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).Approx; 
+            SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).nB+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).nB; 
         }
     }
 #endif
@@ -711,10 +710,10 @@ void Multigrid::updateSol()
 void Multigrid::updateSolElementwise(int i, int j)
 {
 #if defined(COUPLED)
-    Sol[0][0](i,j).U += SolErr[0][0](i,j).U;
-    Sol[0][0](i,j).V += SolErr[0][0](i,j).V;
+    Sol[0][0](i,j).nB += SolErr[0][0](i,j).nB;
+    Sol[0][0](i,j).nA += SolErr[0][0](i,j).nA;
 #else
-    Sol[0][0](i, j).Approx += SolErr[0][0](i, j).Approx;
+    Sol[0][0](i, j).nB += SolErr[0][0](i, j).nB;
 #endif
 
 }
@@ -731,11 +730,11 @@ double Multigrid::evalUpdateErr()
     for ( i=0; i<=P.BoxX; i++)
         for (j=0; j <=P.BoxY; j++)
         {
-            //er2 += max(SolErr[0][0](i).Approx,0.0)*BoxLength*BoxLength;
-            er2U += max(SolErr[0][0](i,j).U,0.0);
-            er2V += max(SolErr[0][0](i,j).V,0.0);
-            erinfU = max(erinfU, abs(SolErr[0][0](i,j).V));
-            erinfV = max(erinfV, abs(SolErr[0][0](i,j).V));
+            //er2 += max(SolErr[0][0](i).nB,0.0)*BoxLength*BoxLength;
+            er2U += max(SolErr[0][0](i,j).nB,0.0);
+            er2V += max(SolErr[0][0](i,j).nA,0.0);
+            erinfU = max(erinfU, abs(SolErr[0][0](i,j).nA));
+            erinfV = max(erinfV, abs(SolErr[0][0](i,j).nA));
         }
     //cout<<" "<<erinf<<" " << er2 << "\n";
     return max(erinfU,erinfV);
@@ -748,9 +747,9 @@ double Multigrid::evalUpdateErr()
     {
         for ( j=0; j<=P.BoxY; j++)
         {
-            //er2 += max(SolErr[0][0](i).Approx,0.0)*BoxLength*BoxLength;
-            er2 += max(SolErr[0][0](i,j).Approx,0.0);
-            erinf = max(erinf, abs(SolErr[0][0](i,j).Approx));
+            //er2 += max(SolErr[0][0](i).nB,0.0)*BoxLength*BoxLength;
+            er2 += max(SolErr[0][0](i,j).nB,0.0);
+            erinf = max(erinf, abs(SolErr[0][0](i,j).nB));
         }
     }
     //cout<<" "<<erinf<<" " << er2 << "\n";
@@ -771,11 +770,11 @@ double Multigrid::evalUpdateRes()
     for ( i=0; i<=P.BoxX; i++)
         for (j=0; j <=P.BoxY; j++)
         {
-            //res2 += max(SolRes[0][0](i).Approx,0.0)*BoxLength*BoxLength;
-            res2U += max(SolRes[0][0](i,j).U,0.0);
-            res2V += max(SolRes[0][0](i,j).V,0.0);
-            resinfU = max(resinfU, abs(SolRes[0][0](i,j).U));
-            resinfV = max(resinfV, abs(SolRes[0][0](i,j).V));
+            //res2 += max(SolRes[0][0](i).nB,0.0)*BoxLength*BoxLength;
+            res2U += max(SolRes[0][0](i,j).nB,0.0);
+            res2V += max(SolRes[0][0](i,j).nA,0.0);
+            resinfU = max(resinfU, abs(SolRes[0][0](i,j).nB));
+            resinfV = max(resinfV, abs(SolRes[0][0](i,j).nA));
         }
     //cout<<" "<<resinf<<" "<<res2<<" "<<endl;
     return max(resinfU,resinfV);
@@ -788,9 +787,9 @@ double Multigrid::evalUpdateRes()
     {
         for ( j=0; j<=P.BoxY; j++)
         {
-            //res2 += max(SolRes[0][0](i).Approx,0.0)*BoxLength*BoxLength;
-            res2 += max(SolRes[0][0](i,j).Approx,0.0);
-            resinf = max(resinf, abs(SolRes[0][0](i,j).Approx));
+            //res2 += max(SolRes[0][0](i).nB,0.0)*BoxLength*BoxLength;
+            res2 += max(SolRes[0][0](i,j).nB,0.0);
+            resinf = max(resinf, abs(SolRes[0][0](i,j).nB));
         }                                                                   
     }
     //cout<<" "<<resinf<<" "<<res2<<" "<<endl;
@@ -847,45 +846,45 @@ double Multigrid::ResVcycle()
 {
 #if defined(COUPLED)
     int i,j, l=0;
-    double rU=0, rV=0;
+    double rB=0, rV=0;
     for (i=1; i<P.BoxX; i++)
         for (j=0; j <=P.BoxY; j++)
         {
-            double ru = SolRes[l][0](i,j).U;
-            double rv = SolRes[l][0](i,j).V;
+            double ru = SolRes[l][0](i,j).nB;
+            double rv = SolRes[l][0](i,j).nA;
             for (int i1=0; i1<3; i1++)
                 for (int j1=0; j1<3; j1++)
                 {
-                    ru = ru-(*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).U-(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).V;
-                    rv = rv-(*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).U-(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).V;
+                    ru = ru-(*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
+                    rv = rv-(*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
                 }  
-            rU = max(rU,abs(ru));
+            rB = max(rB,abs(rB));
             rV = max(rV,abs(rv));
         }
     
-	//cout << "V-cycle Colony residue: "<< rU << " " << rV <<"\n";
-    return max(rU,rV);
+	//cout << "V-cycle Colony residue: "<< rB << " " << rV <<"\n";
+    return max(rB,rV);
 #else
     int i, j, l;
-    double rC=0;
+    double rB=0;
 	for (i=1; i<P.BoxX; i++)
 	{
         for (j=1; j<P.BoxY; j++)
         {
-            double rc = SolRes[0][0](i,j).Approx;
+            double ru = SolRes[0][0](i,j).nB;
             for (int i1=0; i1<3; i1++)
             {
                 for (int j1=0; j1<3; j1++)
                 {
-                    rc = rc-(*SolStencil[l])(i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).Approx;
+                    ru = ru-(*SolStencil[l])(i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).nB;
                 }
             }
-            rC = max(rC,abs(rc));
-            //rC = rc;
+            rB = max(rB,abs(ru));
+            //rB = rB;
         }
     }
-	//cout << "V-cycle Colony residue: "<<rC<< " " << "Level: " << l <<"\n";
-    return rC;
+	//cout << "V-cycle Colony residue: "<<rB<< " " << "Level: " << l <<"\n";
+    return rB;
 #endif
 
 }
@@ -895,7 +894,7 @@ void Multigrid::solve(int mu1, int mu2)
     setup();
     //OutputFiles Files;
     double er = 1; 
-	double rc = 1;
+	double rB = 1;
     double tol = 1e-14;
     int max_It = 10;
     int it = 1;
@@ -903,12 +902,12 @@ void Multigrid::solve(int mu1, int mu2)
     while (it<max_It && er>tol)
     {
         Vcycle(mu1, mu2);
-        rc = ResVcycle();
+        rB = ResVcycle();
         er = evalUpdateErr();
-        cout<< "Cycle = " <<it<<" Error = " << er << " Residual = " << rc <<  "\n";
+        cout<< "Cycle = " <<it<<" Error = " << er << " Residual = " << rB <<  "\n";
         reset();
         it++;
     }
-    //cout << it << " " << ResVcycle() << " " << rc << " " << evalUpdateRes() << endl;
+    //cout << it << " " << ResVcycle() << " " << rB << " " << evalUpdateRes() << endl;
     
 }

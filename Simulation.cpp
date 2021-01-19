@@ -22,10 +22,10 @@ void Test_prob::passvalue(Multigrid& mg)
         for (int j =0; j < P.BoxX; j++)
         {
 #if defined(COUPLED)
-            D[0](i,j).U = mg.Sol[0][0](i,j).U;
-            D[0](i,j).V = mg.Sol[0][0](i,j).V;
+            D[0](i,j).nB = mg.Sol[0][0](i,j).nB;
+            D[0](i,j).nA = mg.Sol[0][0](i,j).nA;
 #else
-            D[0](i,j).Approx = mg.Sol[0][0](i,j).Approx;
+            D[0](i,j).nB = mg.Sol[0][0](i,j).nB;
 #endif
         }
     }

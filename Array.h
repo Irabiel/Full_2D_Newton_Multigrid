@@ -204,7 +204,7 @@ inline void Array2D<Testprob>::Output(FILE* FID)
 	{
 		for (int xi = 0; xi < m_Size.x; xi++)
 		{
-			fprintf(FID, "%6E\t", Data[xi*m_Size.y + yi].U);
+			fprintf(FID, "%6E\t", Data[xi*m_Size.y + yi].nB);
 		}
 		fprintf(FID, "\n");
 	}
@@ -212,7 +212,7 @@ inline void Array2D<Testprob>::Output(FILE* FID)
 	{
 		for (int xi = 0; xi < m_Size.x; xi++)
 		{
-			fprintf(FID, "%6E\t", Data[xi*m_Size.y + yi].V);
+			fprintf(FID, "%6E\t", Data[xi*m_Size.y + yi].nA);
 		}
 		fprintf(FID, "\n");
 	}
@@ -223,7 +223,7 @@ inline void Array2D<Testprob>::Output(FILE* FID)
 	{
 		for (int xi = 0; xi < m_Size.x; xi++)
 		{
-			fprintf(FID, "%6E\t", Data[xi*m_Size.y + yi].Approx);
+			fprintf(FID, "%6E\t", Data[xi*m_Size.y + yi].nB);
 		}
 		fprintf(FID, "\n");
 	}

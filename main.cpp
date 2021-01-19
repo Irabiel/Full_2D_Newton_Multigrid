@@ -35,9 +35,9 @@ using namespace std;
 int main(int argc, char* argv[])
 {   
 #if defined(COUPLED)
-    printf("Applying 2D Newton Multgrid to solve the non linear coupled Dirichlet system, \n -Lu + v^2 = f \n -Lv + u^2 = f \n Where L is the laplacian operator \n");
+    printf("Applying 2D Newton Multgrid to solve the non linear coupled Dirichlet system, \n-L(nB) + (nB)^2 + (nA)^2 = f \n-L(nA) + (nA)^2 + (nB)^2 = f \nWhere L is the laplacian operator \n");
 #else
-    printf("Applying 2D Newton Multgrid to solve the non linear Dirichlet system, \n -Lu + u^2 = f \n Where L is the laplacian operator \n");
+    printf("Applying 2D Newton Multgrid to solve the non linear Dirichlet system, \n-L(nB) + (nB)^2 = f \nWhere L is the laplacian operator \n");
 #endif
     Test_prob Mod(argv[1]);
 	Multigrid mg(argv[1]);
