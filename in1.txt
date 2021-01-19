@@ -1,0 +1,5 @@
+Cycles 		10
+BoxX	256
+BoxY	256
+Levels  	  7
+DirName 	output1
