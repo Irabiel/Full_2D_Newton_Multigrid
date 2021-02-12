@@ -30,5 +30,5 @@ int maxIter = 20000;
 
 // Boundary condition
 
-double B0 = 0.0;
-double A0 = 0.0;
+double B0 = 1.0;
+double A0 = 1.0;

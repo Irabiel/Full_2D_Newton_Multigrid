@@ -258,18 +258,18 @@ void Multigrid::setF()
 #if defined(COUPLED)
             if (i == 0 || i == nx || j == 0 || j == ny)
             {
-                SolRes[0][0](i,j).nB = Sol[0][0](i,j).nB - SolStencil[0][0](i,j)(1,1,0,0)*Sol[0][0](i,j).nB;
-                SolRes[0][0](i,j).nA = Sol[0][0](i,j).nA - SolStencil[0][0](i,j)(1,1,1,1)*Sol[0][0](i,j).nA;
+                SolRes[0][0](i,j).nB = B0 - Sol[0][0](i,j).nB - SolStencil[0][0](i,j)(1,1,0,0)*Sol[0][0](i,j).nB;
+                SolRes[0][0](i,j).nA = A0 - Sol[0][0](i,j).nA - SolStencil[0][0](i,j)(1,1,1,1)*Sol[0][0](i,j).nA;
             }
             else  
             {              
                 SolRes[0][0](i,j).nB = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,0,0)*Sol[0][0](i-1,j).nB + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nB + fA(Sol[0][0](i,j).nA) + fB(Sol[0][0](i,j).nB) + SolStencil[0][0](i,j)(2,1,0,0)*Sol[0][0](i+1,j).nB + SolStencil[0][0](i,j)(1,0,0,0)*Sol[0][0](i,j-1).nB + SolStencil[0][0](i,j)(1,2,0,0)*Sol[0][0](i,j+1).nB);
             
-                SolRes[0][0](i,j).nA = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,1,1)*Sol[0][0](i-1,j).nA + fB(Sol[0][0](i,j).nB) + fA(Sol[0][0](i,j).nA)+(2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nA + SolStencil[0][0](i,j)(2,1,1,1)*Sol[0][0](i+1,j).nA + SolStencil[0][0](i,j)(1,0,1,1)*Sol[0][0](i,j-1).nA + SolStencil[0][0](i,j)(1,2,1,1)*Sol[0][0](i,j+1).nA);
+                SolRes[0][0](i,j).nA = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1,1,1)*Sol[0][0](i-1,j).nA + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nA + fA(Sol[0][0](i,j).nA) + fB(Sol[0][0](i,j).nB) + SolStencil[0][0](i,j)(2,1,1,1)*Sol[0][0](i+1,j).nA + SolStencil[0][0](i,j)(1,0,1,1)*Sol[0][0](i,j-1).nA + SolStencil[0][0](i,j)(1,2,1,1)*Sol[0][0](i,j+1).nA);
             }
 #else
             if (i == 0 || i == nx || j == 0 || j == ny)
-                SolRes[0][0](i,j).nB = Sol[0][0](i,j).nB - SolStencil[0][0](i,j)(1,1)*Sol[0][0](i,j).nB;
+                SolRes[0][0](i,j).nB = B0 - Sol[0][0](i,j).nB - SolStencil[0][0](i,j)(1,1)*Sol[0][0](i,j).nB;
             else
             {
                 SolRes[0][0](i,j).nB = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1)*Sol[0][0](i-1,j).nB + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nB + fB(Sol[0][0](i,j).nB ) + SolStencil[0][0](i,j)(2,1)*Sol[0][0](i+1,j).nB + SolStencil[0][0](i,j)(1,0)*Sol[0][0](i,j-1).nB + SolStencil[0][0](i,j)(1,2)*Sol[0][0](i,j+1).nB);
@@ -328,16 +328,8 @@ void Multigrid::setOperators()
                     {
                         if (k*l == 1)
                         {
-                            if (i == 0 || i == nx)
-                            {
-                                SolStencil[0][0](i,j)(k,l,1,1) = 1.0/(hx*hx);
-                                SolStencil[0][0](i,j)(k,l,0,0) = 1.0/(hx*hx);
-                            }
-                            else
-                            {
-                                SolStencil[0][0](i,j)(k,l,1,1) = 1.0/(hy*hy);
-                                SolStencil[0][0](i,j)(k,l,0,0) = 1.0/(hy*hy);
-                            }
+							SolStencil[0][0](i,j)(k,l,1,1) = 1.0;
+							SolStencil[0][0](i,j)(k,l,0,0) = 1.0;							
                             SolStencil[0][0](i,j)(k,l,0,1) = 0;
                             SolStencil[0][0](i,j)(k,l,1,0) = 0;
                         }
@@ -391,28 +383,16 @@ void Multigrid::setOperators()
                     }
                 }
             }
-#else
-            for (int l = 0; l <3; l++)
+#else            
+            if (i == 0 || i == nx || j == 0 || j == ny)
             {
-                for (int k=0; k<3;k++)
-                {
-                    SolStencil[0][0](i,j)(l,k) = 0;
-                }
-            }
-            
-            if (i == 0 || i == nx)
-            {
-                SolStencil[0][0](i,j)(1,1) = 1.0/(hx*hx);
-            }            
-            else if (j == 0 || j == ny)
-            {
-                SolStencil[0][0](i,j)(1,1) = 1.0/(hy*hy);
-            }
+                SolStencil[0][0](i,j)(1,1) = 1.0;
+            } 
             else
             {   
                 SolStencil[0][0](i,j)(0,1) = -1.0/(hx*hx);
                 SolStencil[0][0](i,j)(2,1) = -1.0/(hx*hx);
-                SolStencil[0][0](i,j)(1,1) =  2.0/(hx*hx) + 2.0/(hy*hy)+dfB(Sol[0][0](i,j).nB);
+                SolStencil[0][0](i,j)(1,1) =  2.0/(hx*hx) + 2.0/(hy*hy) + dfB(Sol[0][0](i,j).nB);
                 SolStencil[0][0](i,j)(1,0) = -1.0/(hy*hy);
                 SolStencil[0][0](i,j)(1,2) = -1.0/(hy*hy);
             }
@@ -498,7 +478,7 @@ void Multigrid::relaxationAtLevel(int l)
 void Multigrid::relaxationElementwise(int l,int i, int j, int nx, int ny)
 {
     
-#if defined(COUPLED)
+#if defined(COUPLED) 
     double rB = SolRes[l][0](i,j).nB, trB = SolRes[l][0](i,j).nB;
     double rv = SolRes[l][0](i,j).nA, trv = SolRes[l][0](i,j).nA;
     for (int i1=0; i1<3; i1++)
@@ -711,9 +691,12 @@ void Multigrid::updateSolElementwise(int i, int j)
 {
 #if defined(COUPLED)
     Sol[0][0](i,j).nB += SolErr[0][0](i,j).nB;
+	if (Sol[0][0](i, j).nB < 0) Sol[0][0](i, j).nB =0;
     Sol[0][0](i,j).nA += SolErr[0][0](i,j).nA;
+	if (Sol[0][0](i, j).nA < 0) Sol[0][0](i, j).nA =0;
 #else
     Sol[0][0](i, j).nB += SolErr[0][0](i, j).nB;
+	if (Sol[0][0](i, j).nB < 0) Sol[0][0](i, j).nB =0;
 #endif
 
 }
@@ -848,7 +831,7 @@ double Multigrid::ResVcycle()
     int i,j, l=0;
     double rB=0, rV=0;
     for (i=1; i<P.BoxX; i++)
-        for (j=0; j <=P.BoxY; j++)
+        for (j=1; j<P.BoxY; j++)
         {
             double ru = SolRes[l][0](i,j).nB;
             double rv = SolRes[l][0](i,j).nA;
@@ -858,8 +841,9 @@ double Multigrid::ResVcycle()
                     ru = ru-(*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
                     rv = rv-(*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
                 }  
-            rB = max(rB,abs(rB));
+            rB = max(rB,abs(ru));
             rV = max(rV,abs(rv));
+			//cout << "V-cycle Colony residue: "<< rB << " " << rV <<"\n";
         }
     
 	//cout << "V-cycle Colony residue: "<< rB << " " << rV <<"\n";
@@ -909,5 +893,4 @@ void Multigrid::solve(int mu1, int mu2)
         it++;
     }
     //cout << it << " " << ResVcycle() << " " << rB << " " << evalUpdateRes() << endl;
-    
 }

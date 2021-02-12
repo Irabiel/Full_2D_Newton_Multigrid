@@ -14,6 +14,8 @@ extern double UpdateTime;
 extern int BoxX;
 extern int BoxY;
 extern int levels;
+extern double B0;
+extern double A0;
 
 // directory name
 extern char DirName[500];

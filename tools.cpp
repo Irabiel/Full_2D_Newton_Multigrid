@@ -67,6 +67,10 @@ param ReadParameters(char* fname)
             p.levels = atof(var_value);
 		else if (strcmp(var_name,"Cycles")==0)
             p.Cycles = atof(var_value);
+		else if (strcmp(var_name,"A0")==0)
+            p.A0 = atof(var_value);
+		else if (strcmp(var_name,"B0")==0)
+            p.B0 = atof(var_value);
         else if (strcmp(var_name,"DirName")==0)
         {
             strcpy(p.DirName, var_value);

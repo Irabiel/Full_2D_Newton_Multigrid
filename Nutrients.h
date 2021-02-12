@@ -14,8 +14,8 @@ struct Testprob
 #if defined(COUPLED)
 	Testprob()
 	{
-		nB = 0.0;
-        nA = 0.0;
+		nB = B0;
+        nA = A0;
 	}
 
 	Testprob(double _B, double _A): nB(_B), nA(_A) {}
@@ -25,7 +25,7 @@ struct Testprob
 #else
 	Testprob()
 	{
-		nB = 0.0;
+		nB = B0;
 	}
 
 	Testprob(double _B): nB(_B) {}

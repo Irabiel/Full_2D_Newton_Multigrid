@@ -126,8 +126,12 @@ private:
     
     double fA(double v) {return v*v;};
     double dfA(double v) {return 2*v;};
+#if defined(COUPLED)
+    double fij(double hx, double hy, double i, double j) {return (-2*( (i*hx)*((i*hx) - 1) + (j*hy)*((j*hy) - 1) ) + ((i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)+B0)*((i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)+B0) + ((i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)+A0)*((i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)+A0));};
+#else
+     double fij(double hx, double hy, double i, double j) {return (-2*( (i*hx)*((i*hx) - 1) + (j*hy)*((j*hy) - 1) ) + ((i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1) + B0)*((i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1) + B0));};
+#endif
     
-    double fij(double hx, double hy, double i, double j) {return (-2*( (i*hx)*((i*hx) - 1) + (j*hy)*((j*hy) - 1) ) + 2*(i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1)*(i*hx)*((i*hx) - 1)*(j*hy)*((j*hy) - 1));};
     
     // private member functions.
     int ipow(int base, int exp);

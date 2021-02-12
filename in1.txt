@@ -3,3 +3,5 @@ BoxX	256
 BoxY	256
 Levels  	  7
 DirName 	output1
+A0  	  1.0
+B0  	  1.0

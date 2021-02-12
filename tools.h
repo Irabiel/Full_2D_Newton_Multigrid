@@ -202,6 +202,8 @@ struct param
     int BoxY;
     int levels;
 	int Cycles;
+	double B0;
+	double A0;
     
     // directory name
     char DirName[500];
