@@ -68,7 +68,6 @@ void Tensor2D2::addMultiplyCopyVale(const Tensor2D & u, double m, int i, int j)
             val[i+i1][j+j1] += u(i1+1,j1+1)*m;
 };
 
-
 Tensor4D::Tensor4D(double v)
 {
     for (int i1 = 0;i1<3;i1++)
@@ -158,8 +157,7 @@ void Tensor4D2::checknan()
                         cout<<i1<<" "<<i2<<" "<<i4<<" "<<i5<<endl;
                 }
             }
-        }
-    
+        }    
     }
 }
 
@@ -197,9 +195,7 @@ Multigrid::Multigrid(char* fname)
         SolInterpolate[i] = new Array2D<Tensor2D>(nx+1,ny+1);
         nx = nx/2;
         ny = ny/2;
-    }
-
-    
+    }    
 };
 
 Multigrid::~Multigrid()
@@ -275,7 +271,6 @@ void Multigrid::setF()
                 SolRes[0][0](i,j).nB = fij(hx,hy,i,j) - (SolStencil[0][0](i,j)(0,1)*Sol[0][0](i-1,j).nB + (2.0/(hx*hx) + 2.0/(hy*hy))*Sol[0][0](i,j).nB + fB(Sol[0][0](i,j).nB ) + SolStencil[0][0](i,j)(2,1)*Sol[0][0](i+1,j).nB + SolStencil[0][0](i,j)(1,0)*Sol[0][0](i,j-1).nB + SolStencil[0][0](i,j)(1,2)*Sol[0][0](i,j+1).nB);
             }
 #endif
-
         }
     }
 }
@@ -399,8 +394,6 @@ void Multigrid::setOperators()
 #endif
         }
     }
-    
-
 }
 
 void Multigrid::setOperatorsNextLevel()
@@ -433,7 +426,6 @@ void Multigrid::setOperatorsNextLevel()
             }
         }
     }
-
 }
 
 int Multigrid::ipow(int base, int exp)
@@ -490,10 +482,8 @@ void Multigrid::relaxationElementwise(int l,int i, int j, int nx, int ny)
                 rB = rB-(*SolStencil[l])(i,j)(i1,j1,0,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,0,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
                 rv = rv-(*SolStencil[l])(i,j)(i1,j1,1,0)*SolErr[l][0](i+i1-1,j+j1-1).nB-(*SolStencil[l])(i,j)(i1,j1,1,1)*SolErr[l][0](i+i1-1,j+j1-1).nA;
             }
-
         }
-    }
-    
+    }    
     double d1 = det2x2((*SolStencil[l])(i,j)(1,1,0,0),(*SolStencil[l])(i,j)(1,1,0,1),(*SolStencil[l])(i,j)(1,1,1,0),(*SolStencil[l])(i,j)(1,1,1,1));
     double nu = det2x2(rB,rv,(*SolStencil[l])(i,j)(1,1,0,1),(*SolStencil[l])(i,j)(1,1,0,0));
     double nv = det2x2(rv,rB,(*SolStencil[l])(i,j)(1,1,1,0),(*SolStencil[l])(i,j)(1,1,1,1));
@@ -516,7 +506,6 @@ void Multigrid::relaxationElementwise(int l,int i, int j, int nx, int ny)
     }
     SolErr[l][0](i,j).nB = rB/SolStencil[l][0](i,j)(1,1);
 #endif
-
 }
 
 void Multigrid::residueRestriction(int l)
@@ -594,7 +583,6 @@ void Multigrid::restrictionElementwise2(int l,int i, int j, int nx, int ny)
         }
     }
 #endif
-
 }
 
 void Multigrid::interpolation(int l)
@@ -698,7 +686,6 @@ void Multigrid::updateSolElementwise(int i, int j)
     Sol[0][0](i, j).nB += SolErr[0][0](i, j).nB;
 	if (Sol[0][0](i, j).nB < 0) Sol[0][0](i, j).nB =0;
 #endif
-
 }
 
 double Multigrid::evalUpdateErr()
@@ -738,7 +725,6 @@ double Multigrid::evalUpdateErr()
     //cout<<" "<<erinf<<" " << er2 << "\n";
     return erinf;
 #endif
-
 }
 
 double Multigrid::evalUpdateRes()
@@ -778,7 +764,6 @@ double Multigrid::evalUpdateRes()
     //cout<<" "<<resinf<<" "<<res2<<" "<<endl;
     return resinf;
 #endif
-
 }
 
 void Multigrid::setup()
@@ -844,8 +829,7 @@ double Multigrid::ResVcycle()
             rB = max(rB,abs(ru));
             rV = max(rV,abs(rv));
 			//cout << "V-cycle Colony residue: "<< rB << " " << rV <<"\n";
-        }
-    
+        }    
 	//cout << "V-cycle Colony residue: "<< rB << " " << rV <<"\n";
     return max(rB,rV);
 #else
@@ -865,18 +849,16 @@ double Multigrid::ResVcycle()
             }
             rB = max(rB,abs(ru));
             //rB = rB;
-        }
-    }
+		}
 	//cout << "V-cycle Colony residue: "<<rB<< " " << "Level: " << l <<"\n";
     return rB;
+	}
 #endif
-
 }
 
 void Multigrid::solve(int mu1, int mu2)
 {
     setup();
-    //OutputFiles Files;
     double er = 1; 
 	double rB = 1;
     double tol = 1e-14;
