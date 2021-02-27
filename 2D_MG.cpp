@@ -275,7 +275,6 @@ void Multigrid::setF()
     }
 }
 
-
 void Multigrid::resetZero()
 {    
     for (int l=0;l< P.levels;l++)
@@ -297,6 +296,26 @@ void Multigrid::resetZero()
             }
         }
     }
+}
+
+void Multigrid::resetZero(int l)
+{    
+	int nx = P.BoxX/ipow(2,l);
+	int ny = P.BoxY/ipow(2,l);
+	int i, j;
+//#pragma omp parallel for default(shared) private(i)
+	for ( i=0; i<=nx; i++)
+	{
+		for ( j=0; j<=ny; j++)
+		{
+#if defined(COUPLED)
+			SolErr[l][0](i,j).nB = 0;
+			SolErr[l][0](i,j).nA = 0;
+#else
+			SolErr[l][0](i,j).nB = 0;
+#endif
+		}
+	}
 }
 
 //To do Newton Multigrid change this code 
@@ -630,7 +649,7 @@ void Multigrid::interpolationElementwise(int l, int i, int j, int nx, int ny)
         else
         {
             SolErr[l][0](i,j).nB += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).nB+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).nB; 
-            SolErr[l][0](i,j).nA += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).nA+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).nB+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).nA+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).nA; 
+            SolErr[l][0](i,j).nA += SolInterpolate[l][0](i,j)(0,0)*SolErr[l+1][0]((i-1)/2,(j-1)/2).nA+SolInterpolate[l][0](i,j)(0,2)*SolErr[l+1][0]((i+1)/2,(j-1)/2).nA+SolInterpolate[l][0](i,j)(2,0)*SolErr[l+1][0]((i-1)/2,(j+1)/2).nA+SolInterpolate[l][0](i,j)(2,2)*SolErr[l+1][0]((i+1)/2,(j+1)/2).nA; 
         }
     }
 #else
@@ -809,6 +828,39 @@ void Multigrid::Vcycle(int mu1, int mu2)
     }
 }
 
+void Multigrid::FMG(int mu1, int mu2)
+{
+    setRestrInterp();
+    setF();
+    setOperators();
+    setOperatorsNextLevel();
+
+	for (int l= P.levels-1; l>=0; l--)
+    {
+        for (int j=P.levels-1; j<l;j--)
+		{
+			if(j==P.levels-1)
+			{
+				for (int k=0;j<mu2; j++)
+				{
+					relaxationAtLevel(P.levels-1);
+				}
+			}
+			else
+			{
+				residueRestriction(l);
+				for (int k=0;j<mu1; j++)
+				{
+					relaxationAtLevel(j);
+				}
+				updateSol();
+			}
+		}
+		resetZero(0);
+		Vcycle(mu1, mu2);
+    }
+}
+
 //Need to work on this
 double Multigrid::ResVcycle()
 {
@@ -833,26 +885,25 @@ double Multigrid::ResVcycle()
 	//cout << "V-cycle Colony residue: "<< rB << " " << rV <<"\n";
     return max(rB,rV);
 #else
-    int i, j, l;
+    int i, j, l=0;
     double rB=0;
 	for (i=1; i<P.BoxX; i++)
 	{
         for (j=1; j<P.BoxY; j++)
         {
-            double ru = SolRes[0][0](i,j).nB;
-            for (int i1=0; i1<3; i1++)
-            {
-                for (int j1=0; j1<3; j1++)
-                {
-                    ru = ru-(*SolStencil[l])(i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).nB;
-                }
-            }
-            rB = max(rB,abs(ru));
-            //rB = rB;
-		}
+			double ru = SolRes[0][0](i,j).nB;
+			for (int i1=0; i1<3; i1++)
+			{
+				for (int j1=0; j1<3; j1++)
+				{
+					ru = ru-(*SolStencil[l])(i,j)(i1,j1)*SolErr[l][0](i+i1-1,j+j1-1).nB;
+				}
+			}
+			rB = max(rB,abs(ru));
+        }
 	//cout << "V-cycle Colony residue: "<<rB<< " " << "Level: " << l <<"\n";
-    return rB;
 	}
+	return rB;
 #endif
 }
 
@@ -867,7 +918,8 @@ void Multigrid::solve(int mu1, int mu2)
 	
     while (it<max_It && er>tol)
     {
-        Vcycle(mu1, mu2);
+        //Vcycle(mu1, mu2);
+		FMG(mu1, mu2);
         rB = ResVcycle();
         er = evalUpdateErr();
         cout<< "Cycle = " <<it<<" Error = " << er << " Residual = " << rB <<  "\n";

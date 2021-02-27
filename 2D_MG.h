@@ -87,6 +87,7 @@ public:
     void setOperators();
     void setOperatorsNextLevel();
     void resetZero();
+	void resetZero(int l);
     void relaxationAtLevel(int l);
     void relaxationElementwise(int l, int i, int j, int nx, int ny);
     void residueRestriction(int l);
@@ -98,6 +99,7 @@ public:
     void updateSolElementwise(int i, int j);
     void setup();
     void Vcycle(int mu1, int mu2);
+	void FMG(int mu1, int mu2);
     void solve(int mu1, int mu2);
     void reset();
     double evalUpdateErr();
